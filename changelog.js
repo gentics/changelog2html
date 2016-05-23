@@ -52,7 +52,7 @@ function getTagOfIsh(ish, path, file) {
  * @param {String} changelogFolder - Folder which contains the git changelog files.
  * @returns a promise
  */
-function render(templateFile = "template.html", changelogFolder = "src/main/changelog") {
+function render(templateFile, changelogFolder) {
 	var deferred = Q.defer();
 
 	var files = fs.readdirSync(changelogFolder);
@@ -68,7 +68,6 @@ function render(templateFile = "template.html", changelogFolder = "src/main/chan
 }
 
 module.exports  = render;
-
 
 if (require.main === module) {
 	console.log('This script is meant to be used as a library. You probably want to run bin/changelog2html if you\'re looking for a CLI.');
