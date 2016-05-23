@@ -2,6 +2,7 @@
 
 Yet another changelog tool which uses git to build a html changelog.
 
+### Description
 
 The changelog will be generated using a set of changelog files. Each change will be documented in its own changelog file which has a unique filename:
 
