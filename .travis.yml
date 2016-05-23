@@ -1,0 +1,7 @@
+language: node_js
+node_js:
+ -  '6.10.0'
+deploy:
+api_key:
+secure:
+provider: npm
