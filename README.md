@@ -2,6 +2,10 @@
 
 Yet another changelog tool which uses git to build a html changelog.
 
+[![Build Status](https://secure.travis-ci.org/gentics/changelog2html)](http://travis-ci.org/gentics/changelog2html)
+[![Downloads](https://img.shields.io/npm/dm/changelog2html.svg)](https://www.npmjs.com/package/changelog2html)
+[![NPM version](http://img.shields.io/npm/v/changelog2html.svg)](https://www.npmjs.org/package/changelog2html)
+
 ### Description
 
 The changelog will be generated using a set of changelog files. Each change will be documented in its own changelog file which has a unique filename:
