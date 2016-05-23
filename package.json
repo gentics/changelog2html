@@ -1,7 +1,7 @@
 {
-  "name": "changelog-generator",
+  "name": "changelog2html",
   "version": "0.0.1",
-  "description": "A changelog generator which uses git tags to identify versions and dates for found changelog entries.",
+  "description": "A changelog generator which uses git tags to identify versions and dates for found changelog entry files.",
   "main": "changelog.js",
   "scripts": {
     "test": "node test"
@@ -9,7 +9,7 @@
   "os": [
     "!win32"
   ],
-  "author": "",
+  "author": "Johannes Schüth",
   "license": "ISC",
   "dependencies": {
     "commander": "2.9.x",
