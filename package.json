@@ -2,6 +2,11 @@
   "name": "changelog2html",
   "version": "0.0.2",
   "description": "A changelog generator which uses git tags to identify versions and dates for found changelog entry files.",
+  "keywords": [ "git", "changelog", "tooling" ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gentics/changelog2html"
+  },
   "main": "changelog.js",
   "scripts": {
     "test": "node test"
@@ -9,8 +14,9 @@
   "os": [
     "!win32"
   ],
-  "author": "Johannes Schüth",
+  "author": "Johannes Schüth <git@jotschi.de>",
   "license": "ISC",
+  "preferGlobal": true,
   "dependencies": {
     "commander": "2.9.x",
     "markdown": "^0.5.0",
