@@ -1,7 +1,10 @@
 language: node_js
 node_js:
- -  '6.10.0'
-deploy:
-api_key:
-secure:
+- 6.10.0
+deploy: 
+api_key: 
+secure: 
 provider: npm
+env:
+  global:
+    secure: e3qwGN1KscsoiCrKhngFxPUR9H3XIr+i189RW39/gxWK9w1zGuvs1piFG1m9a/MPz4ngd1gu7LC3R7uv8U4r/vavGZaVOPXD2JFTRmnDRw1zT2Bad1cvNK3yAsWqSAUlo2QSU0D1K9w6HMdBCTaS468hxKPhVm1zNmFodB47/SvioPeMiTvwLGCRhhgb9ZmdBCFmORyy9/23fw8xIB/9dbSiPdIgSLa+MZpjqQ4wlZP6CHXbY/RH1qL14shz7QJiqhd1E7nRUc6Fn+Y9ctB9RjMHtxdFJFxX3NE1PwQuHOk4UrKV9kmRN3LFUYHP6FuMnCHL3bbeQ+bcr8I1q9NanVn6p1RTO0y4cBeKZLbLTWu93immC8umprOopGAeIjYrmgTRhVnvkVVTiONDT6kWppBWH4ALOHMfoJfPQ+VcD9i/33ef+/XXzbqgcPWUOfNWwR8BYl03/TcTgTiKie4/n5k4Yf7a3On1Or4RIgwuvmH8NA1tze1wzCdA/EnoGcunPXik0gs20nm73eZjabMHiaX/68f85ocTwOPBFzMwsmP6306Su/PgO0M1anMhwEO1bONfpnG7tfXrvuJAZ/bjjzh3Y7GfGqkjMECdIVeHAHRDnmABOGo8EwLEOBmBg6ISUdgwbWeElKSuZEGxn5pBPZfomkE071XBEC8verA6TXw=
