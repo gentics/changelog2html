@@ -12,7 +12,7 @@ The changelog will be generated using a set of changelog files. Each change will
 
 The files can be added at any time during your development process but i suggest that you add them in combination with your changes.
 
-The changelog2html tool will iterate over these files and determine which git tag effectivly introduced each file. This way a release tag can automatically be linked to each file and thus a version can be assigned to each change. Using this information a swig template will be used to render the changelog.
+The changelog2html tool will iterate over these files and determine which git tag effectively introduced each file. This way a release tag can automatically be linked to each file and thus a version can be assigned to each change. Using this information a swig template will be used to render the changelog.
 The changelog content must be markdown. A markdown parser will convert the content to html.
 
 The main advantage is that you avoid having conflicts since each change has its own change file. Additionally the changelog is decoupled from the SCM log and thus a enduser friendly changelog can be maintained.
