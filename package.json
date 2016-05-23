@@ -1,0 +1,24 @@
+{
+  "name": "changelog-generator",
+  "version": "0.0.1",
+  "description": "A changelog generator which uses git tags to identify versions and dates for found changelog entries.",
+  "main": "changelog.js",
+  "scripts": {
+    "test": "node test"
+  },
+  "os": [
+    "!win32"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "2.9.x",
+    "markdown": "^0.5.0",
+    "mkdirp": "^0.5.1",
+    "q": "1.4.x",
+    "swig": "^1.4.2"
+  },
+  "bin": {
+    "changelog2html": "./bin/changelog2html"
+  }
+}
