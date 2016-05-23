@@ -15,6 +15,8 @@ The files can be added at any time during your development process but i suggest
 The changelog2html tool will iterate over these files and determine which git tag effectivly introduced each file. This way a release tag can automatically be linked to each file and thus a version can be assigned to each change. Using this information a swig template will be used to render the changelog.
 The changelog content must be markdown. A markdown parser will convert the content to html.
 
+The main advantage is that you avoid having conflicts since each change has its own change file. Additionally the changelog is decoupled from the SCM log and thus a enduser friendly changelog can be maintained.
+
 ### Workflow
 
 * Create and commit changelog file
@@ -26,7 +28,6 @@ The changelog content must be markdown. A markdown parser will convert the conte
 ```bash
 $ npm install changelog2html -g
 $ changelog2html 
-Error: You need to specify the changelog folder
 
   Usage: changelog2html [options] [Changelog folder]
 
@@ -36,6 +37,8 @@ Error: You need to specify the changelog folder
     -V, --version              output the version number
     -t, --template [template]  Filename of the custom swig template
     -o, --output [output]      HTML output file
+
+$ changelog2html -t template.html -o build/changelog.html changes
 ```
 
 ## Libary usage
