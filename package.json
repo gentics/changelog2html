@@ -1,6 +1,6 @@
 {
   "name": "changelog2html",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A changelog generator which uses git tags to identify versions and dates for found changelog entry files.",
   "keywords": [
     "git",
@@ -19,13 +19,16 @@
     "!win32"
   ],
   "author": "Johannes Schüth <git@jotschi.de>",
+  "contributors": [{
+     "name": "Leon Adler",
+     "email": ""
+  }],
   "license": "ISC",
   "preferGlobal": true,
   "dependencies": {
     "commander": "2.9.x",
     "markdown": "^0.5.0",
     "mkdirp": "^0.5.1",
-    "q": "1.4.x",
     "swig": "^1.4.2"
   },
   "bin": {
