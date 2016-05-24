@@ -48,8 +48,8 @@ $ changelog2html -t template.html -o build/changelog.html changes
 ## Libary usage
 
 ```js
-changelog = require('changelog-generator');
-changelog("template.html", "src/main/changelog").then(function(result) {
+changelog = require('changelog2html');
+changelog(".", "template.html", "changes").then(function(result) {
   console.log(result);
 });
 ```

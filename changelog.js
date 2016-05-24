@@ -3,13 +3,7 @@
 const nodegit = require('nodegit');
 const fs = require('fs');
 
-module.exports = renderChangelogForFolder;
-
-// Test
-let promise = renderChangelogForFolder('.','template.html', 'changes');
-promise.then(function (output) {
-	console.log("OUTPUT: ", output);
-});
+module.exports = render;
 
 const fileRegex = /([^\.]*)\.([^\.]*)\.(.*)/;
 
@@ -19,7 +13,7 @@ const fileRegex = /([^\.]*)\.([^\.]*)\.(.*)/;
  * @param {String} pathInRepo      - Folder which contains the git changelog files.
  * @returns a promise
  */
-function renderChangelogForFolder(repoPath, templateFile, pathInRepo) {
+function render(repoPath, templateFile, pathInRepo) {
 	const path = require('path');
 	const markdown = require('markdown').markdown;
 	const swig = require('swig');
