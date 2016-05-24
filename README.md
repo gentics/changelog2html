@@ -29,8 +29,6 @@ The main advantage is that you avoid having conflicts since each change has its 
 
 ## Install
 
->  *Please note that this tool is currently using* **exec** *to invoke the git command line tool.*
-
 ```bash
 $ npm install changelog2html -g
 $ changelog2html 

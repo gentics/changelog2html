@@ -6,7 +6,7 @@
 			<ul>
 				{% for change in version %}
 				<li>
-					<h2>{{change.type}} - {{change.tag}} - {{change.date}}</h2>
+					<h2>{{change.type}} - {{change.tag}} - {{change.date|date('F jS, Y') }}</h2>
 					<p>{{change.contentRendered|safe}}</p>
 				</li>
 				{% endfor %}

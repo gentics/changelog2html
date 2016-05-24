@@ -1,73 +1,171 @@
-var fs = require('fs');
-var path = require('path');
-var process = require('process');
-var execSync = require('child_process').execSync;
-var swig = require('swig');
-var markdown = require('markdown').markdown;
-var versions = {};
-var Q = require('q');
+const nodegit = require('nodegit');
+const fs = require('fs');
 
-/** 
- * Return the git commit hash of the file which created it.
- * @param {String} folder - parent folder of file 
- * @param {String} file - filename of file which should be checked
- */
-function getIshOfFile(folder, file) {
-	var path = folder + "/" + file;
-	var output = execSync('git log --oneline --diff-filter=A --pretty=format:%h -- ' + path);
-	getTagOfIsh(output, path, file);
-}
-var fileRegex = /([^\.]*)\.([^\.]*)\.(.*)/;
+module.exports = renderChangelogForFolder;
 
-/**
- * Determine the first git tag in which the ish occurs and add the found information to the versions object.
- * @param {String} ish - Git commit hash to be checked.
- * @param {String} path - Parent path of the current file.
- * @param {String} file - Current filename.
- */
-function getTagOfIsh(ish, path, file) {
-	var output = execSync('git tag --format \'{ "tag": "%(refname:short)", "date": "%(authordate)" }\' --contains ' +  ish);
-	var infoJSON  = output.toString().split('\n')[0];
-	if (infoJSON.length != 0) {
-		var info = JSON.parse(infoJSON);
-		var content = fs.readFileSync(path, 'utf8');
-		var rendered = markdown.toHTML(content);
-		info.path = path;
-		info.content = content;
-		info.contentRendered = rendered;
-		var matches = fileRegex.exec(file);
-		info.type = matches[2];
+// Test
+let promise = renderChangelogForFolder('.','template.html', 'changes');
+promise.then(function (output) {
+	console.log("OUTPUT: ", output);
+});
 
-		if (typeof versions[info.tag] === 'undefined') {
-			versions[info.tag] = {};
-		}
-		versions[info.tag][file] = info;
-	}
-}
-
+const fileRegex = /([^\.]*)\.([^\.]*)\.(.*)/;
 
 /**
  * Render the changelog.
  * @param {String} templateFile    - Swig template file which should be used to render the changelog.
- * @param {String} changelogFolder - Folder which contains the git changelog files.
+ * @param {String} pathInRepo      - Folder which contains the git changelog files.
  * @returns a promise
  */
-function render(templateFile, changelogFolder) {
-	var deferred = Q.defer();
+function renderChangelogForFolder(repoPath, templateFile, pathInRepo) {
+	const path = require('path');
+	const markdown = require('markdown').markdown;
+	const swig = require('swig');
 
-	var files = fs.readdirSync(changelogFolder);
-	files.forEach( function(file, index) {
-		getIshOfFile(changelogFolder, file);
-	});
-	var html = swig.renderFile(templateFile, {
-		pagename: 'Changelog',
-		versions: versions
-	});
-	deferred.resolve(html);
-	return deferred.promise;
+	let repo, tags, headHistory;
+
+	// Open repository and list files in folder
+	return Promise.all([
+		nodegit.Repository.open(repoPath)
+		.then(repository =>
+			Promise.all([
+				// We need a commit list of HEAD ...
+				repository.getHeadCommit()
+					.then(headCommit => getHistoryOfCommit(headCommit))
+					.then(history => headHistory = history),
+				// ... and all tags in the repo
+				getTagCommitsOfRepo(repository)
+					.then(tagList => tags = tagList)
+			])
+			.then(() => repo = repository)
+		),
+		findFilesInFolder(path.join(repoPath, pathInRepo))
+	])
+	// Result is [repo, file list]
+	.then(result => result[1])
+	// Find first tag for each file
+	.then(fileList => Promise.all(fileList.map(
+		file => {
+			return findFirstCommitForFile(headHistory, path.join(pathInRepo, file))
+			.then(commit => {
+				return {tag: findFirstTagWithCommit(tags, commit), commit: commit}
+			})
+			.then(
+				tag => ({ fileName: file, firstTag: tag.tag, commit: tag.commit}),
+				error => ({ fileName: file, firstTag: null })
+			);
+		}
+	)))
+	// If we can not find the history for a file, remove it from the list
+	.then(fileList => {
+		// Create datastructure which will be used for rendering the template
+		let versions = {};
+		fileList.forEach(file => {
+			let filePath = path.join(pathInRepo, file.fileName);
+			let content = fs.readFileSync(filePath, 'utf8');
+			let rendered = markdown.toHTML(content);
+
+			if (!versions[file.firstTag]) {
+				versions[file.firstTag] = {};
+			}
+			var matches = fileRegex.exec(file.fileName);
+			versions[file.firstTag][file.fileName] = {
+				content: content,
+				contentRendered: rendered,
+				path: filePath,
+				date: file.commit.date(),
+				tag: file.firstTag,
+				type: matches[2]
+			};
+		});
+		return versions;
+	})
+	.then(renderInfo => {
+		let html = swig.renderFile(templateFile, {
+				pagename: 'Changelog',
+				versions: renderInfo
+		});
+		return html;
+	})
+	.catch(console.error.bind(console));
 }
 
-module.exports  = render;
+function findFirstCommitForFile(repoHeadHistory, filepath) {
+	return findAllCommitsForFile(repoHeadHistory, filepath)
+	.then(allCommits => {
+		allCommits.sort((a, b) => b.date() - a.date());
+		return allCommits.length < 1 ? null : allCommits.pop();
+	});
+}
+
+function findAllCommitsForFile(repoHeadHistory, filepath) {
+	return Promise.all(
+		repoHeadHistory.map(
+			commit => commit.getEntry(filepath)
+			.then(
+				entry => commit,
+				fail => null
+			)
+		)
+	)
+	.then(commitList => commitList.filter(entry => entry != null));
+}
+
+function getTagCommitsOfRepo(repo) {
+	// Returns tags of the repo (sorted oldest to newest)
+	// with all commits that happened before the tag
+	return nodegit.Tag.list(repo)
+	.then(tagNames => Promise.all(tagNames.map(tagName =>
+		nodegit.Reference.nameToId(repo, 'refs/tags/' + tagName)
+		.then(oid => repo.getCommit(oid.tostrS()))
+		.then(commit =>
+			getHistoryOfCommit(commit)
+			.then(history => {
+				return { tagName: tagName, headCommit: commit, history: history };
+			})
+		)
+	)))
+	.then(tagList => tagList.sort(
+		(a, b) => a.headCommit.date() - b.headCommit.date()
+	));
+}
+
+function getHistoryOfCommit(headCommit) {
+	return new Promise(resolve => {
+		let history = headCommit.history();
+		let commits = [];
+		history.on('commit', commit => commits.push(commit));
+		history.on('end', () => resolve(commits));
+		history.start();
+	});
+}
+
+function findFirstTagWithCommit(tags, commit) {
+	// tags is sorted (oldest tag .. newest tag) 
+	const commitHash = (typeof commit == 'string') ? commit : commit.sha();
+	for (let i = 0; i < tags.length; i++) {
+		for (let j = 0; j < tags[i].history.length; j++) {
+			if (tags[i].history[j].sha() == commitHash) {
+				return tags[i].tagName;
+			}
+		}
+	}
+
+	return null;
+}
+
+function findFilesInFolder(folder) {
+	const fs = require('fs');
+	return new Promise((success, fail) => {
+		fs.readdir(folder, (err, fileList) => {
+			if (err) {
+				return fail(err);
+			} else {
+				return success(fileList);
+			}
+		});
+	});
+}
 
 if (require.main === module) {
 	console.log('This script is meant to be used as a library. You probably want to run bin/changelog2html if you\'re looking for a CLI.');

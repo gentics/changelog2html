@@ -10,37 +10,36 @@ var mkdirp = require('mkdirp');
 var getDirName = require('path').dirname;
 
 program
-  .version(pjson.version)
-  .usage('[options] [Changelog folder]')
-  .option('-t, --template [template]', 'Filename of the custom swig template')
-  .option('-o, --output [output]', 'HTML output file')
-  .parse(process.argv);
+	.version(pjson.version)
+	.usage('[options] [Changelog folder]')
+	.option('-t, --template [template]', 'Filename of the custom swig template')
+	.option('-o, --output [output]', 'HTML output file')
+	.parse(process.argv);
 
 var input = program.input;
 
 if (!input) {
-  if (program.args.length !== 1) {
-    console.error('Error: You need to specify the changelog folder');
-    program.help();
-    process.exit(1);
-  }
-
-  input = program.args[0];
+	if (program.args.length !== 1) {
+		console.error('Error: You need to specify the changelog folder');
+		program.help();
+		process.exit(1);
+	}
+	input = program.args[0];
 }
 
 // Start the rendering process
-changelog(program.template, input).then(function(result) {
-  if (program.output) {
-    mkdirp(getDirName(program.output), function (err) {
-      if (err) return cb(err);
-      fs.writeFileSync(program.output, result);
-    });
-  } else {
-    // Simply output to console
-    process.stdout.write(result);
-    process.exit(0);
-  }
+changelog(process.cwd(), program.template, input).then(function(result) {
+	if (program.output) {
+		mkdirp(getDirName(program.output), function (err) {
+			if (err) return cb(err);
+			fs.writeFileSync(program.output, result);
+		});
+	} else {
+		// Simply output to console
+		process.stdout.write(result);
+		process.exit(0);
+	}
 }).catch(function(error) {
-  console.error(new Error(error));
-  process.exit(1);
+	console.error(new Error(error));
+	process.exit(1);
 });
