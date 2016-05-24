@@ -27,8 +27,9 @@ if (!input) {
 	input = program.args[0];
 }
 
+//console.log(input);
 // Start the rendering process
-changelog(process.cwd(), program.template, input).then(function(result) {
+changelog(program.template, input).then(function(result) {
 	if (program.output) {
 		mkdirp(getDirName(program.output), function (err) {
 			if (err) return cb(err);
@@ -40,6 +41,6 @@ changelog(process.cwd(), program.template, input).then(function(result) {
 		process.exit(0);
 	}
 }).catch(function(error) {
-	console.error(new Error(error));
+	console.error(error.message);
 	process.exit(1);
 });

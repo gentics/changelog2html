@@ -49,7 +49,9 @@ $ changelog2html -t template.html -o build/changelog.html changes
 
 ```js
 changelog = require('changelog2html');
-changelog(".", "template.html", "changes").then(function(result) {
+let templateFile = "template.html";
+let pathToChangesFolder = "changes";
+changelog(templateFile, pathToChangesFolder).then(function(result) {
   console.log(result);
 });
 ```

@@ -2,47 +2,70 @@
 
 const nodegit = require('nodegit');
 const fs = require('fs');
+const path = require('path');
 
 module.exports = render;
 
 const fileRegex = /([^\.]*)\.([^\.]*)\.(.*)/;
 
+
+function checkFolders(templateFile, pathToChangesFolder) {
+	var filepath = path.resolve(process.cwd(),pathToChangesFolder);
+	//console.log("Rendering changelog for repo in {" + repoPath + "} using template {" + templateFile + "}");
+	//console.log("Checking change files in {" + pathInRepo + "}");
+	return checkPath(templateFile, false, "Could not find template file {" + templateFile + "}")
+	.then(e => checkPath(pathToChangesFolder, true, "Could not find changes folder {" + pathToChangesFolder + "}"))
+	.then(e => nodegit.Repository.discover(pathToChangesFolder, 100, ""))
+	.then(buf => {
+		let workspaceFolderPath = path.resolve(buf.toString(), "..");
+		let pathToChangesWithinRepo = path.relative(workspaceFolderPath, filepath);
+		return {
+			'repoPath':	buf.toString(),
+			'workspacePath': workspaceFolderPath,
+			'changesPath': pathToChangesWithinRepo
+		}
+		//.then(e => checkPath(repoPath, true, "Could not find repository folder {" + repoPath +"}"))
+	});
+}
+
 /**
  * Render the changelog.
  * @param {String} templateFile    - Swig template file which should be used to render the changelog.
- * @param {String} pathInRepo      - Folder which contains the git changelog files.
+ * @param {String} pathToChangesFolder      - Folder which contains the git changelog files.
  * @returns a promise
  */
-function render(repoPath, templateFile, pathInRepo) {
-	const path = require('path');
+function render(templateFile, pathToChangesFolder) {
 	const markdown = require('markdown').markdown;
 	const swig = require('swig');
 
-	let repo, tags, headHistory;
+	let repo, tags, headHistory, pathInfo;
 
-	// Open repository and list files in folder
-	return Promise.all([
-		nodegit.Repository.open(repoPath)
-		.then(repository =>
-			Promise.all([
-				// We need a commit list of HEAD ...
-				repository.getHeadCommit()
-					.then(headCommit => getHistoryOfCommit(headCommit))
-					.then(history => headHistory = history),
-				// ... and all tags in the repo
-				getTagCommitsOfRepo(repository)
-					.then(tagList => tags = tagList)
-			])
-			.then(() => repo = repository)
-		),
-		findFilesInFolder(path.join(repoPath, pathInRepo))
-	])
+	return checkFolders(templateFile, pathToChangesFolder)
+	.then(info => {
+		pathInfo = info;
+		return Promise.all([
+			nodegit.Repository.open(pathInfo.repoPath)
+			.then(repository =>
+				Promise.all([
+					// We need a commit list of HEAD ...
+					repository.getHeadCommit()
+						.then(headCommit => getHistoryOfCommit(headCommit))
+						.then(history => headHistory = history),
+					// ... and all tags in the repo
+					getTagCommitsOfRepo(repository)
+						.then(tagList => tags = tagList)
+				])
+				.then(() => repo = repository)
+			),
+			findFilesInFolder(pathToChangesFolder)
+		])
+	})
 	// Result is [repo, file list]
 	.then(result => result[1])
 	// Find first tag for each file
 	.then(fileList => Promise.all(fileList.map(
 		file => {
-			return findFirstCommitForFile(headHistory, path.join(pathInRepo, file))
+			return findFirstCommitForFile(headHistory, path.join(pathInfo.changesPath, file))
 			.then(commit => {
 				return {tag: findFirstTagWithCommit(tags, commit), commit: commit}
 			})
@@ -57,7 +80,7 @@ function render(repoPath, templateFile, pathInRepo) {
 		// Create datastructure which will be used for rendering the template
 		let versions = {};
 		fileList.forEach(file => {
-			let filePath = path.join(pathInRepo, file.fileName);
+			let filePath = path.join(pathToChangesFolder, file.fileName);
 			let content = fs.readFileSync(filePath, 'utf8');
 			let rendered = markdown.toHTML(content);
 
@@ -95,6 +118,7 @@ function findFirstCommitForFile(repoHeadHistory, filepath) {
 }
 
 function findAllCommitsForFile(repoHeadHistory, filepath) {
+	//console.log(filepath);
 	return Promise.all(
 		repoHeadHistory.map(
 			commit => commit.getEntry(filepath)
@@ -146,8 +170,25 @@ function findFirstTagWithCommit(tags, commit) {
 			}
 		}
 	}
-
 	return null;
+}
+
+function checkPath(path, expectFolder, failureMessage) {
+	return new Promise((success, fail) => {
+		fs.stat(path, (err, stats) => {
+			if (err) {
+				return fail(failureMessage, err);
+			} else {
+				if (expectFolder && !stats.isDirectory()) {
+					return fail(failureMessage);
+				}
+				if (!expectFolder && !stats.isFile()) {
+					return fail(failureMessage);
+				}
+ 				return success(null);
+			}
+		});
+	});
 }
 
 function findFilesInFolder(folder) {
