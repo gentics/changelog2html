@@ -131,19 +131,34 @@ function findAllCommitsForFile(repoHeadHistory, filepath) {
 	.then(commitList => commitList.filter(entry => entry != null));
 }
 
+/**
+ * Returns tags of the repo (sorted oldest to newest)
+ * with all commits that happened before the tag.
+ *
+ * @returns a promise which contains an array in form of [{tagName, headCommit, history}]
+ */
 function getTagCommitsOfRepo(repo) {
-	// Returns tags of the repo (sorted oldest to newest)
-	// with all commits that happened before the tag
+	
 	return nodegit.Tag.list(repo)
-	.then(tagNames => Promise.all(tagNames.map(tagName =>
-		nodegit.Reference.nameToId(repo, 'refs/tags/' + tagName)
-		.then(oid => repo.getCommit(oid.tostrS()))
-		.then(commit =>
-			getHistoryOfCommit(commit)
-			.then(history => {
+	.then(tagNames => Promise.all(tagNames.map(tagName => {
+		//log("Loading commit for tag {" + tagName+ "}");
+		return nodegit.Reference.nameToId(repo, 'refs/tags/' + tagName)
+		.then(oid => {	
+			return repo.getCommit(oid.tostrS()).catch(err => {
+				//log("Tag {" + tagName +"} seems to be annotated tag. Applying fallback.");
+				return repo.getTag(oid.tostrS()).then(tag => {
+					return repo.getCommit(tag.target().id().tostrS());
+				});
+			});
+		})
+		.then(commit => {
+			//log("Found commit {" + commit.sha()+"} for tag {" + tagName + "}");
+			return getHistoryOfCommit(commit).then(history => {
+				//log("Found {" + history.length +"} commits for tag {" + tagName + "}");
 				return { tagName: tagName, headCommit: commit, history: history };
 			})
-		)
+		}
+		)}
 	)))
 	.then(tagList => tagList.sort(
 		(a, b) => a.headCommit.date() - b.headCommit.date()
