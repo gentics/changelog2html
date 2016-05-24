@@ -15,7 +15,9 @@
   "scripts": {
     "test": "node test"
   },
-  "engines" : { "node" : ">=4.0.0" },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "os": [
     "!win32"
   ],
@@ -30,6 +32,7 @@
   "preferGlobal": true,
   "dependencies": {
     "commander": "2.9.x",
+    "debug": "^2.2.0",
     "markdown": "^0.5.0",
     "mkdirp": "^0.5.1",
     "nodegit": "^0.13.0",
