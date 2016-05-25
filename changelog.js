@@ -84,10 +84,20 @@ function render(templateFile, pathToChangesFolder) {
 			let content = fs.readFileSync(filePath, 'utf8');
 			let rendered = markdown.toHTML(content);
 
+			var matches = fileRegex.exec(file.fileName);
+			// Add current date to local uncomitted changes
+			if (file.firstTag == null) {
+				file.firstTag = "pending";
+				file.commit = {};
+				file.commit.date = function() {
+					return	new Date();
+				}
+			}
+
 			if (!versions[file.firstTag]) {
 				versions[file.firstTag] = {};
 			}
-			var matches = fileRegex.exec(file.fileName);
+
 			versions[file.firstTag][file.fileName] = {
 				content: content,
 				contentRendered: rendered,
