@@ -21,11 +21,14 @@ The changelog content must be markdown. A markdown parser will convert the conte
 
 The main advantage is that you avoid having conflicts since each change has its own change file. Additionally the changelog is decoupled from the SCM log and thus a enduser friendly changelog can be maintained.
 
-### Workflow
+### TLDR; 
 
-* Create and commit changelog file
-* Create regular release and tag your sources using git
+* Create a new changelog file with the name pattern [uuid].[changetype].md in your changes folder within your git project.
+* Describe your change within that file. I suggest to write a styleguide for other developers.
+* Once you are happy with your release create regular release and tag your sources using git
 * Run changelog2html over your changelog folder to generate your html changelog file
+* Publish the generated changelog.html file somewhere
+* Done
 
 ## Install
 
