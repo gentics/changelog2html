@@ -70,7 +70,7 @@ function render(templateFile, pathToChangesFolder) {
 				return {tag: findFirstTagWithCommit(tags, commit), commit: commit}
 			})
 			.then(
-				tag => ({ fileName: file, firstTag: tag.tag, commit: tag.commit}),
+				tag => ({ fileName: file, firstTag: tag.tag.tagName, fileCommit: tag.commit, tagCommit: tag.tag.headCommit}),
 				error => ({ fileName: file, firstTag: null })
 			);
 		}
@@ -95,14 +95,17 @@ function render(templateFile, pathToChangesFolder) {
 			}
 
 			if (!versions[file.firstTag]) {
-				versions[file.firstTag] = {};
+				versions[file.firstTag] = {
+					date: file.tagCommit.date(),
+					changes: {}
+				};
 			}
 
-			versions[file.firstTag][file.fileName] = {
+			versions[file.firstTag]['changes'][file.fileName] = {
 				content: content,
 				contentRendered: rendered,
 				path: filePath,
-				date: file.commit.date(),
+				date: file.fileCommit.date(),
 				tag: file.firstTag,
 				type: matches[2]
 			};
@@ -117,6 +120,7 @@ function render(templateFile, pathToChangesFolder) {
 		return html;
 	})
 	.catch(console.error.bind(console));
+
 }
 
 function findFirstCommitForFile(repoHeadHistory, filepath) {
@@ -191,7 +195,7 @@ function findFirstTagWithCommit(tags, commit) {
 	for (let i = 0; i < tags.length; i++) {
 		for (let j = 0; j < tags[i].history.length; j++) {
 			if (tags[i].history[j].sha() == commitHash) {
-				return tags[i].tagName;
+				return tags[i];
 			}
 		}
 	}

@@ -65,18 +65,19 @@ Example template:
 <h1>{{ pagename|title }}</h1>
 <ul>
 {% for versionTag, version in versions %}
-        <li><h2>{{versionTag}}</h2>
-                <p>
-                        <ul>
-                                {% for change in version %}
-                                <li>
-                                        <h2>{{change.type}} - {{change.tag}} - {{change.date}}</h2>
-                                        <p>{{change.contentRendered|safe}}</p>
-                                </li>
-                                {% endfor %}
-                        </ul>
-                </p>
-        </li>
+    <li><h2>{{versionTag}} - {{version.date|date('F jS, Y') }}</h2>
+        <p>
+            <ul>
+                {% for change in version.changes %}
+                <li>
+                    <h2>{{change.type}} - {{change.tag}} - {{change.date|date('F jS, Y') }}</h2>
+                    <p>{{change.contentRendered|safe}}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </p>
+    </li>
 {% endfor %}
+</ul>
 ```
 
