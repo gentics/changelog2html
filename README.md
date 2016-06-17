@@ -21,7 +21,7 @@ The changelog content must be markdown. A markdown parser will convert the conte
 
 The main advantage is that you avoid having conflicts since each change has its own change file. Additionally the changelog is decoupled from the SCM log and thus a enduser friendly changelog can be maintained.
 
-### TLDR; 
+### TL;DR
 
 * Create a new changelog file with the name pattern [uuid].[changetype].md in your changes folder within your git project.
 * Describe your change within that file. I suggest to write a styleguide for other developers.
@@ -48,7 +48,7 @@ $ changelog2html
 $ changelog2html -t template.html -o build/changelog.html changes
 ```
 
-## Libary usage
+## Library usage
 
 ```js
 changelog = require('changelog2html');
