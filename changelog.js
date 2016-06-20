@@ -126,7 +126,6 @@ function render(templateFile, pathToChangesFolder) {
 	.then(renderInfo => {
 		renderInfo.keys.sort();
 		renderInfo.keys.reverse();
-		console.dir(renderInfo.keys);
 		let html = swig.renderFile(templateFile, {
 				pagename: 'Changelog',
 				versions: renderInfo
