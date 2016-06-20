@@ -1,10 +1,10 @@
 <h1>{{ pagename|title }}</h1>
 <ul>
-{% for versionTag, version in versions %}
-	<li><h2>{{versionTag}} - {{version.date|date('F jS, Y') }}</h2>
+{% for version in versions.keys %}
+	<li><h2>{{version}} - {{versions[version].date|date('F jS, Y') }}</h2>
 		<p>
 			<ul>
-				{% for change in version.changes %}
+				{% for change in versions[version].changes %}
 				<li>
 					<h2>{{change.type}} - {{change.tag}} - {{change.date|date('F jS, Y') }}</h2>
 					<p>{{change.contentRendered|safe}}</p>

@@ -79,15 +79,25 @@ function render(templateFile, pathToChangesFolder) {
 	.then(fileList => {
 		// Create datastructure which will be used for rendering the template
 		let versions = {};
+		versions.keys = [];
 		fileList.forEach(file => {
 			let filePath = path.join(pathToChangesFolder, file.fileName);
 			let content = fs.readFileSync(filePath, 'utf8');
 			let rendered = markdown.toHTML(content);
 
 			var matches = fileRegex.exec(file.fileName);
+
 			// Add current date to local uncomitted changes
 			if (file.firstTag == null) {
 				file.firstTag = "pending";
+				file.tagCommit = {};
+				file.tagCommit.date = function() {
+					return	new Date();
+				}
+				file.fileCommit = {};
+				file.fileCommit.date = function() {
+					return	new Date();
+				}
 				file.commit = {};
 				file.commit.date = function() {
 					return	new Date();
@@ -95,6 +105,7 @@ function render(templateFile, pathToChangesFolder) {
 			}
 
 			if (!versions[file.firstTag]) {
+				versions.keys.push(file.firstTag);
 				versions[file.firstTag] = {
 					date: file.tagCommit.date(),
 					changes: {}
@@ -113,6 +124,9 @@ function render(templateFile, pathToChangesFolder) {
 		return versions;
 	})
 	.then(renderInfo => {
+		renderInfo.keys.sort();
+		renderInfo.keys.reverse();
+		console.dir(renderInfo.keys);
 		let html = swig.renderFile(templateFile, {
 				pagename: 'Changelog',
 				versions: renderInfo

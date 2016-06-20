@@ -41,6 +41,6 @@ changelog(program.template, input).then(function(result) {
 		process.exit(0);
 	}
 }).catch(function(error) {
-	console.error(error.message);
+	console.error(error);
 	process.exit(1);
 });
