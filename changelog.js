@@ -118,9 +118,7 @@ function render(templateFile, pathToChangesFolder) {
 				versions: renderInfo
 		});
 		return html;
-	})
-	.catch(console.error.bind(console));
-
+	});
 }
 
 function findFirstCommitForFile(repoHeadHistory, filepath) {
